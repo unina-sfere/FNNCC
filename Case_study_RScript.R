@@ -26,10 +26,7 @@ loglam <- seq(-4,0,0.25)
 lambda_grid <- 10^loglam
 
 mfdobj_phaseI <- HVAC_dataset %>% 
-  filter(Train %in% c("Train 1", "Train 2", "Train 3", "Train 4")) %>%
-  bind_rows(HVAC_dataset %>%
-              filter(Train == "Train 5") %>%
-              filter(Time <= "10-25")) %>% # to remove the PhaseII observations
+  filter(Phase == "Phase I") %>%
   arrange(Train, VN, Time) %>%
   filter(Percent_distance >= 0.25) %>% # the first 25% of the traveled distance of each profile is discarded
   group_by(VN) %>% 
@@ -52,10 +49,7 @@ dev_setpoint <-  deriv.fd(mfdobj_phaseI[,"coach_SetPointTemp"])
 # The scalar quality characteristic
 
 scalar_train <- HVAC_dataset %>% 
-  filter(Train %in% c("Train 1", "Train 2", "Train 3", "Train 4")) %>%
-  bind_rows(HVAC_dataset %>%
-              filter(Train == "Train 5") %>%
-              filter(Time <= "10-25")) %>%
+  filter(Phase == "Phase I") %>%
   filter(VN %in% unique(mfdobj_phaseI[["raw"]][["VN"]])) %>%
   arrange(Train, VN, Time) %>%
   filter(Percent_distance >= 0.25) %>%
@@ -101,8 +95,7 @@ voyage_id_tun <- setdiff(voyage_id_PhaseI, voyage_id_train)
 # Phase II data
 
 mfdobj_test <- HVAC_dataset %>% 
-  filter(Train == "Train 5") %>% 
-  filter(Coach == "Coach 4") %>% 
+  filter(Phase == "Phase II") %>%
   filter(Percent_distance >= 0.25) %>% # the first 25% of the traveled distance of each profile is discarded
   group_by(VN) %>% 
   mutate(Percent_distance = (Percent_distance - 0.25)/0.75) %>%
@@ -121,8 +114,7 @@ dev_setpoint_test <-  deriv.fd(mfdobj_test[,"coach_SetPointTemp"])
 # Response variable
 
 scalar_test <- HVAC_dataset %>% 
-  filter(Train == "Train 5") %>% 
-  filter(Coach == "Coach 4") %>% 
+  filter(Phase == "Phase II") %>%
   filter(Percent_distance >= 0.25) %>%
   group_by(VN) %>%
   mutate(dev_deltaTemp =sqrt(sum(DeltaTemp^2))/n) %>% 
