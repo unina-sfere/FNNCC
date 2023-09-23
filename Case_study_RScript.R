@@ -102,6 +102,7 @@ voyage_id_tun <- setdiff(voyage_id_PhaseI, voyage_id_train)
 
 mfdobj_test <- HVAC_dataset %>% 
   filter(Train == "Train 5") %>% 
+  filter(Coach == "Coach 4") %>% 
   filter(Percent_distance >= 0.25) %>% # the first 25% of the traveled distance of each profile is discarded
   group_by(VN) %>% 
   mutate(Percent_distance = (Percent_distance - 0.25)/0.75) %>%
@@ -120,7 +121,8 @@ dev_setpoint_test <-  deriv.fd(mfdobj_test[,"coach_SetPointTemp"])
 # Response variable
 
 scalar_test <- HVAC_dataset %>% 
-  filter(Train == "Train 5") %>%
+  filter(Train == "Train 5") %>% 
+  filter(Coach == "Coach 4") %>% 
   filter(Percent_distance >= 0.25) %>%
   group_by(VN) %>%
   mutate(dev_deltaTemp =sqrt(sum(DeltaTemp^2))/n) %>% 
@@ -194,6 +196,8 @@ predictionsII <- fnn.predict(model = fnn_sim,
 res <-  scalar_test - predictionsII # residuals
 
 # Plot control chart
+
+rows <- 50:90
 
 df_test <- cbind(res[rows], seq(1, length(res[rows])), 
                  res[rows] > UCL_FNN_np | res[rows] < LCL_FNN_np)  
